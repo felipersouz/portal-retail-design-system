@@ -49,9 +49,9 @@ design-system/
 | Layer | Technology |
 |---|---|
 | Framework | Angular 20 (standalone, signals, OnPush) |
-| UI Primary | PrimeNG 20 |
-| UI Secondary | Angular Material 20 |
-| CSS | Bootstrap 5 (utilities) + Bootstrap Icons |
+| UI (always first) | PrimeNG 20 |
+| UI (fallback only) | Angular Material 20 — only when PrimeNG has no equivalent |
+| CSS | Bootstrap 5 (utilities + `bi bi-*` icons only) |
 | Forms (dynamic) | ngx-formly 7 |
 | Forms (static) | Angular Reactive Forms |
 

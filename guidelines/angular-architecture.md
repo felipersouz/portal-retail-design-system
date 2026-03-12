@@ -10,9 +10,9 @@
 | Category | Technology | Notes |
 |---|---|---|
 | Framework | Angular 20 | Standalone components only |
-| UI (primary) | PrimeNG 20 | Tables, forms, dialogs, overlays |
-| UI (secondary) | Angular Material 20 | Navigation, snackbars, layout |
-| CSS Framework | Bootstrap 5 | Utilities and grid only |
+| UI (primary) | PrimeNG 20 | **Always first choice** — tables, forms, dialogs, overlays, menus, navigation, inputs, buttons, tooltips, badges, chips, calendars, dropdowns |
+| UI (fallback) | Angular Material 20 | Only when PrimeNG has no equivalent component |
+| CSS Framework | Bootstrap 5 | Utility classes and `bi bi-*` icons only — never Bootstrap JS components |
 | Icons | Bootstrap Icons | `bi bi-*` classes |
 | Forms (dynamic) | ngx-formly 7 | Complex/dynamic form schemas |
 | Forms (static) | Angular Reactive Forms | All other forms |

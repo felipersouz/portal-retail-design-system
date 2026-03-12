@@ -43,7 +43,9 @@ When asked to generate any Angular code for portal-retail, ALWAYS:
 - Signals for all local state (`signal()`, `computed()`, `update()`)
 - Native control flow only (`@if`, `@for`, `@switch`) — never `*ngIf`, `*ngFor`
 - `[class]` and `[style]` bindings — never `[ngClass]` or `[ngStyle]`
-- PrimeNG → Angular Material → Bootstrap (in this priority for new UI)
+- **PrimeNG is always the first choice** for any UI component
+- Angular Material only when PrimeNG has no equivalent for the needed component
+- Bootstrap 5 for utility classes and icons only — never for UI components
 - Reactive Forms only — never Template-driven
 - All page content wrapped in `<content-wrapper>`
 - `app-button` for all buttons — never raw `<button>` without `bt-*` class
