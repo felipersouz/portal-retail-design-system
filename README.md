@@ -30,6 +30,7 @@ design-system/
 │   ├── angular-modern-features.md     # Signals, resource(), defer, linkedSignal, etc.
 │   ├── rxjs.md                        # RxJS operators, patterns, toSignal, takeUntilDestroyed
 │   ├── code-quality.md                # Clean code, TypeScript strictness, naming
+│   ├── reusable-components.md         # Architecture for generic, typed, scalable shared components
 │   ├── file-structure.md              # Folder/file naming conventions
 │   └── tooling.md                     # CLI commands, build, testing
 │

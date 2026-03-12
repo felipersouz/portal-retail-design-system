@@ -35,6 +35,7 @@ When asked to generate any Angular code for portal-retail, ALWAYS:
 | Angular modern features (signals, resource, defer) | `guidelines/angular-modern-features.md` |
 | RxJS patterns and operators | `guidelines/rxjs.md` |
 | Code quality and clean code | `guidelines/code-quality.md` |
+| Reusable / shared component architecture | `guidelines/reusable-components.md` |
 | Tooling / CLI | `guidelines/tooling.md` |
 
 ## Quick Reference — Non-negotiable Rules
