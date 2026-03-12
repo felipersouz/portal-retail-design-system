@@ -26,9 +26,12 @@ design-system/
 │   └── form-page.md      # Create/Edit form pattern (TypeScript + HTML)
 │
 ├── guidelines/
-│   ├── angular-architecture.md  # Angular 20 rules and patterns
-│   ├── file-structure.md        # Folder/file naming conventions
-│   └── tooling.md               # CLI commands, build, testing
+│   ├── angular-architecture.md        # Angular 20 rules and patterns
+│   ├── angular-modern-features.md     # Signals, resource(), defer, linkedSignal, etc.
+│   ├── rxjs.md                        # RxJS operators, patterns, toSignal, takeUntilDestroyed
+│   ├── code-quality.md                # Clean code, TypeScript strictness, naming
+│   ├── file-structure.md              # Folder/file naming conventions
+│   └── tooling.md                     # CLI commands, build, testing
 │
 ├── prompts/
 │   ├── create-listing-page.md   # AI prompt to generate listing pages

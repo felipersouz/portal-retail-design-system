@@ -32,6 +32,9 @@ When asked to generate any Angular code for portal-retail, ALWAYS:
 | Create a form page | `patterns/form-page.md` |
 | File/folder structure | `guidelines/file-structure.md` |
 | Angular architecture | `guidelines/angular-architecture.md` |
+| Angular modern features (signals, resource, defer) | `guidelines/angular-modern-features.md` |
+| RxJS patterns and operators | `guidelines/rxjs.md` |
+| Code quality and clean code | `guidelines/code-quality.md` |
 | Tooling / CLI | `guidelines/tooling.md` |
 
 ## Quick Reference — Non-negotiable Rules
