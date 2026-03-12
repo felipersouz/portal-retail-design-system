@@ -1,0 +1,50 @@
+---
+context: true
+priority: critical
+scope: project
+---
+
+# Portal Retail Design System
+
+This repository IS the design system. It defines all rules, tokens, components, patterns, and guidelines for the `portal-retail-frontend` Angular project.
+
+## How the AI must use this repository
+
+When asked to generate any Angular code for portal-retail, ALWAYS:
+
+1. **Read the relevant design system file first** using the GitHub MCP or filesystem MCP before generating code
+2. Apply all rules from the matching file
+3. Never deviate from the patterns unless explicitly instructed
+
+### File reference map
+
+| Task | Read this file first |
+|---|---|
+| Any color usage | `tokens/colors.md` |
+| Any text/font | `tokens/typography.md` |
+| Any layout/spacing | `tokens/spacing.md` |
+| Button component | `components/button.md` |
+| Data table / listing | `components/dynamic-table.md` |
+| Page title / heading | `components/heading.md` |
+| Page layout | `components/content-wrapper.md` |
+| KPI cards / stats | `components/stat-card.md` |
+| Create a listing page | `patterns/listing-page.md` |
+| Create a form page | `patterns/form-page.md` |
+| File/folder structure | `guidelines/file-structure.md` |
+| Angular architecture | `guidelines/angular-architecture.md` |
+| Tooling / CLI | `guidelines/tooling.md` |
+
+## Quick Reference — Non-negotiable Rules
+
+- Standalone components only (NO `standalone: true` in decorator — it's default)
+- `ChangeDetectionStrategy.OnPush` on every component
+- `inject()` function, never constructor injection
+- `input()` and `output()` functions, never `@Input()` / `@Output()`
+- Signals for all local state (`signal()`, `computed()`, `update()`)
+- Native control flow only (`@if`, `@for`, `@switch`) — never `*ngIf`, `*ngFor`
+- `[class]` and `[style]` bindings — never `[ngClass]` or `[ngStyle]`
+- PrimeNG → Angular Material → Bootstrap (in this priority for new UI)
+- Reactive Forms only — never Template-driven
+- All page content wrapped in `<content-wrapper>`
+- `app-button` for all buttons — never raw `<button>` without `bt-*` class
+- `eretail-dynamic-table` for all data lists — never raw `mat-table` in pages
