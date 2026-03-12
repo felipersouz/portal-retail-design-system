@@ -52,7 +52,6 @@ design-system/
 | UI (always first) | PrimeNG 20 |
 | UI (fallback only) | Angular Material 20 — only when PrimeNG has no equivalent |
 | CSS | Bootstrap 5 (utilities + `bi bi-*` icons only) |
-| Forms (dynamic) | ngx-formly 7 |
 | Forms (static) | Angular Reactive Forms |
 
 ### Key Rules

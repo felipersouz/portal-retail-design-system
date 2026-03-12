@@ -14,7 +14,6 @@
 | UI (fallback) | Angular Material 20 | Only when PrimeNG has no equivalent component |
 | CSS Framework | Bootstrap 5 | Utility classes and `bi bi-*` icons only — never Bootstrap JS components |
 | Icons | Bootstrap Icons | `bi bi-*` classes |
-| Forms (dynamic) | ngx-formly 7 | Complex/dynamic form schemas |
 | Forms (static) | Angular Reactive Forms | All other forms |
 | Charts | ApexCharts + ng-apexcharts | All chart types |
 | Maps | Leaflet + MapLibre GL | Geo features |
@@ -188,7 +187,7 @@ export const PRODUCT_ROUTES: Routes = [
 
 ## Form Rules
 
-### Reactive Forms (static forms)
+### Reactive Forms
 
 ```typescript
 // ✅ Use FormBuilder via inject()
@@ -207,16 +206,3 @@ onSubmit(): void {
 }
 ```
 
-### ngx-formly (dynamic forms)
-
-Use `ngx-formly` when the form structure is data-driven or configured by the backend.
-
-```typescript
-fields: FormlyFieldConfig[] = [
-  {
-    key: 'name',
-    type: 'input',
-    props: { label: 'Name', required: true },
-  },
-];
-```
