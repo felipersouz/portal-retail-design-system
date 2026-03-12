@@ -29,7 +29,7 @@ Create a complete Angular 20 create/edit form page for [ENTITY_NAME] following t
 1. Single component handles both create and edit via route param `id`
 2. Use `computed()` for `isEditMode` and `pageTitle`
 3. Use `ChangeDetectionStrategy.OnPush`
-4. Use Angular Material form fields with `appearance="outline"`
+4. Use PrimeNG form components: `pInputText`, `p-select`, `p-iftalabel`, `p-message` — no Angular Material
 5. Use `app-button` for submit (bt-primary) and cancel (bt-default)
 6. Call `form.markAllAsTouched()` before early return on invalid
 7. Show inline `mat-error` for each validation
