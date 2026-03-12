@@ -2,6 +2,7 @@
 
 The standard pattern for create and edit forms. A single `FormComponent` handles both modes using route params.
 All form UI uses **PrimeNG** components only.
+Uses skeleton loading (edit mode), `ToastService` for feedback, and inline error state.
 
 ---
 
@@ -10,19 +11,23 @@ All form UI uses **PrimeNG** components only.
 ```typescript
 import {
   Component, OnInit, inject, signal,
-  ChangeDetectionStrategy, computed
+  ChangeDetectionStrategy, computed, DestroyRef
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, finalize, of } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { IftaLabelModule } from 'primeng/iftalabel';
 import { MessageModule } from 'primeng/message';
+import { SkeletonModule } from 'primeng/skeleton';
 import { ContentWrapperComponent } from '@shared/components/content-wrapper/content-wrapper.component';
 import { HeadingComponent } from '@shared/components/heading/heading.component';
 import { CustomButtonComponent } from '@shared/components/button/button/button.component';
+import { ToastService } from '@core/helpers/toast.service';
 import { FeatureService } from '@core/services/feature.service';
 import { Feature } from '@core/models/feature.model';
 
@@ -40,26 +45,29 @@ import { Feature } from '@core/models/feature.model';
     TextareaModule,
     IftaLabelModule,
     MessageModule,
+    SkeletonModule,
   ],
   templateUrl: './feature-form.component.html',
 })
 export class FeatureFormComponent implements OnInit {
-  private service = inject(FeatureService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
-  private fb = inject(FormBuilder);
+  private service    = inject(FeatureService);
+  private router     = inject(Router);
+  private route      = inject(ActivatedRoute);
+  private fb         = inject(FormBuilder);
+  private toast      = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
-  // Determine create vs edit mode
-  private editId = signal<number | null>(null);
-  isEditMode = computed(() => this.editId() !== null);
-  pageTitle = computed(() => this.isEditMode() ? 'Edit Feature' : 'New Feature');
+  // Create vs Edit mode
+  private editId  = signal<number | null>(null);
+  isEditMode      = computed(() => this.editId() !== null);
+  pageTitle       = computed(() => this.isEditMode() ? 'Edit Feature' : 'New Feature');
 
-  isSaving = signal(false);
-  isLoading = signal(false);
+  isSaving   = signal(false);
+  isLoading  = signal(false);
+  hasError   = signal(false);
 
-  // Select options example
   statusOptions = [
-    { label: 'Active', value: 'active' },
+    { label: 'Active',   value: 'active' },
     { label: 'Inactive', value: 'inactive' },
   ];
 
@@ -77,20 +85,34 @@ export class FeatureFormComponent implements OnInit {
     }
   }
 
-  // Helper: returns true when the field is invalid AND touched (or form submitted)
+  // Returns true when the field is invalid AND touched
   isInvalid(control: AbstractControl | null): boolean {
     return !!control && control.invalid && control.touched;
   }
 
   private loadFeature(id: number): void {
     this.isLoading.set(true);
-    this.service.getById(id).subscribe({
-      next: (data) => {
-        this.form.patchValue(data);
+    this.hasError.set(false);
+    this.form.disable();
+
+    this.service.getById(id).pipe(
+      catchError(() => {
+        this.hasError.set(true);
+        this.toast.showErrorToast('Error', 'Failed to load the record. Please try again.');
+        return of(null);
+      }),
+      finalize(() => {
         this.isLoading.set(false);
-      },
-      error: () => this.isLoading.set(false),
+        this.form.enable();
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(data => {
+      if (data) this.form.patchValue(data);
     });
+  }
+
+  onRetry(): void {
+    if (this.editId()) this.loadFeature(this.editId()!);
   }
 
   onSubmit(): void {
@@ -106,12 +128,20 @@ export class FeatureFormComponent implements OnInit {
       ? this.service.update(this.editId()!, payload)
       : this.service.create(payload);
 
-    request$.subscribe({
+    request$.pipe(
+      finalize(() => this.isSaving.set(false)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: () => {
-        this.isSaving.set(false);
+        this.toast.showSuccessToast(
+          'Success',
+          this.isEditMode() ? 'Feature updated successfully.' : 'Feature created successfully.'
+        );
         this.router.navigate(['/feature']);
       },
-      error: () => this.isSaving.set(false),
+      error: () => {
+        this.toast.showErrorToast('Error', 'Failed to save. Please try again.');
+      },
     });
   }
 
@@ -129,11 +159,43 @@ export class FeatureFormComponent implements OnInit {
 <content-wrapper>
   <app-heading [title]="pageTitle()" />
 
+  <!-- Loading state: skeleton (edit mode only) -->
   @if (isLoading()) {
-    <div class="d-flex justify-content-center p-4">
-      <p-progress-spinner />
-    </div>
-  } @else {
+    <p-card>
+      <p-skeleton width="30%" height="1rem" styleClass="mb-4" />
+
+      <p-skeleton width="100%" height="2.75rem" styleClass="mb-3" />
+      <p-skeleton width="100%" height="5rem"    styleClass="mb-3" />
+      <p-skeleton width="100%" height="2.75rem" styleClass="mb-3" />
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <p-skeleton width="6rem" height="2.25rem" />
+        <p-skeleton width="8rem" height="2.25rem" />
+      </div>
+    </p-card>
+  }
+
+  <!-- Error state: inline message with retry -->
+  @else if (hasError()) {
+    <p-card>
+      <div class="d-flex flex-column align-items-center gap-3 py-4">
+        <p-message
+          severity="error"
+          text="Failed to load the record. Check your connection and try again." />
+        <div class="d-flex gap-2">
+          <app-button buttonClass="bt-default" (clicked)="onCancel()">
+            Back
+          </app-button>
+          <app-button buttonClass="bt-primary" icon="arrow-clockwise" (clicked)="onRetry()">
+            Try again
+          </app-button>
+        </div>
+      </div>
+    </p-card>
+  }
+
+  <!-- Success state: form -->
+  @else {
     <p-card>
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="eretail-form-sm">
 
@@ -215,6 +277,25 @@ export class FeatureFormComponent implements OnInit {
 
 ---
 
+## Skeleton for Form Fields
+
+Match the number and size of skeletons to the real fields so the layout does not shift:
+
+```html
+<!-- One skeleton per field, height matches the real input -->
+<p-skeleton width="100%" height="2.75rem" styleClass="mb-3" />
+<p-skeleton width="100%" height="5rem"    styleClass="mb-3" />
+<p-skeleton width="100%" height="2.75rem" styleClass="mb-3" />
+
+<!-- Action buttons row at the end -->
+<div class="d-flex justify-content-end gap-2 mt-3">
+  <p-skeleton width="6rem" height="2.25rem" />
+  <p-skeleton width="8rem" height="2.25rem" />
+</div>
+```
+
+---
+
 ## PrimeNG Form Components Reference
 
 | Need | Component | Import |
@@ -228,21 +309,28 @@ export class FeatureFormComponent implements OnInit {
 | Checkbox | `<p-checkbox>` | `CheckboxModule` from `primeng/checkbox` |
 | Radio | `<p-radiobutton>` | `RadioButtonModule` from `primeng/radiobutton` |
 | Infield label | `<p-iftalabel>` wrapping input | `IftaLabelModule` from `primeng/iftalabel` |
-| Error message | `<p-message severity="error" size="small" variant="simple">` | `MessageModule` from `primeng/message` |
+| Inline error | `<p-message severity="error" size="small" variant="simple">` | `MessageModule` from `primeng/message` |
 | Card container | `<p-card>` | `CardModule` from `primeng/card` |
+| Skeleton | `<p-skeleton>` | `SkeletonModule` from `primeng/skeleton` |
 
 ---
 
 ## Rules
 
-- ✅ A single component handles both create and edit via route param `id`
-- ✅ Use `computed()` for derived state like `isEditMode` and `pageTitle`
-- ✅ Use `isInvalid(control)` helper to keep templates clean
-- ✅ Call `form.markAllAsTouched()` before returning on invalid
-- ✅ Always set `[invalid]` binding on PrimeNG inputs for visual feedback
-- ✅ Wrap every field in `<p-iftalabel>` for consistent label positioning
-- ✅ Show `p-message` errors below each field when touched + invalid
-- ✅ Show loading state while fetching data in edit mode
-- ❌ Never create separate `CreateComponent` and `EditComponent`
-- ❌ Never use `mat-form-field`, `matInput`, `mat-select` — use PrimeNG equivalents
-- ❌ Never use `[(ngModel)]` — use Reactive Forms
+- Three exclusive states: `isLoading` (skeleton) then `hasError` (inline error) then form
+- Skeleton must mirror the actual form layout — one skeleton per field, matching height
+- Disable the form with `form.disable()` while loading, re-enable in `finalize()`
+- Call `toast.showSuccessToast` after every successful save
+- Call `toast.showErrorToast` on save error AND on load error
+- Show inline `p-message` per field for validation errors (touched + hasError)
+- Set `[invalid]` binding on PrimeNG inputs for visual feedback
+- Call `form.markAllAsTouched()` before returning on invalid submit
+- Use `catchError` + `finalize` in the pipe — never inside subscribe callbacks
+- Use `takeUntilDestroyed(this.destroyRef)` on every subscription
+- A single component handles both create and edit via route param `id`
+- Use `computed()` for `isEditMode` and `pageTitle`
+- Show retry button with back option on page load error
+- Never create separate CreateComponent and EditComponent
+- Never use `mat-form-field`, `matInput`, `mat-select` — use PrimeNG equivalents
+- Never use `[(ngModel)]` — use Reactive Forms
+- Never show `p-progress-spinner` alone as loading state in forms — use skeleton
